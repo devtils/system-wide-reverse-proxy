@@ -1,0 +1,22 @@
+
+version: "3"
+
+# Note: Add content of `./.hosts` to `/etc/hosts`
+
+networks:
+  traefik:
+    external: true
+
+services:
+
+  app:
+    image: php:8-cli
+    command: sh -c 'echo "<?php phpinfo(); ?>" > index.php; php -S "0.0.0.0:80 -t . index.php'
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.traefik-example-php--app.rule=Host(`php.example.traefik.local`) || Host(`www.php.example.traefik.local`)
+      - traefik.http.routers.traefik-example-php--app.service=traefik-example-php--app
+      - traefik.http.services.traefik-example-php--app.loadbalancer.server.port=80

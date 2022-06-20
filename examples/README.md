@@ -12,6 +12,9 @@ The basic requirement for all examples is, of course, getting `traefik` to run f
 
 The examples are more or less built on top each other. If you want to be able to follow them well, read them in order.
 
+1. [`PHP`](./php/README.md)
+1. [`PHP MySQL Adminer`](./php-mysql-adminer/README.md)
+
 After you followed and tried out those examples, you should be able to setup any other frontend framework (`react`, `angular`) and also backend languages (`plain nodejs`, `express`, even `C/C++`, `C#` and `Java`)
 
 You can choose to either setup specific examples (follow instructions of their `README.md`s) or setup all of them at once in the next section.
