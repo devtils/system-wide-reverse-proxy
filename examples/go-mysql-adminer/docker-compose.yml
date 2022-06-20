@@ -1,0 +1,58 @@
+
+version: "3"
+
+# Note: Add content of `./.hosts` to `/etc/hosts`
+
+networks:
+  default: # every container needs this network
+  traefik: # only containers supposed to be publicly reachable for everyone need this network
+    external: true
+
+volumes:
+  database:
+
+services:
+
+  app:
+    build: .
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - default
+      - traefik
+    volumes:
+      - ./client:/usr/src/client
+      - ./server:/usr/src/server
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.traefik-example-go-mysql-adminer--app.rule=Host(`go-mysql-adminer.example.traefik.local`) || Host(`www.go-mysql-adminer.example.traefik.local`)
+      - traefik.http.routers.traefik-example-go-mysql-adminer--app.service=traefik-example-go-mysql-adminer--app
+      - traefik.http.services.traefik-example-go-mysql-adminer--app.loadbalancer.server.port=80
+
+  database:
+    image: mariadb
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - default
+      # - traefik # private
+    volumes:
+      - database:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    labels:
+      - traefik.enable=false
+
+  adminer:
+    image: adminer
+    networks:
+      - default
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.traefik-example-go-mysql-adminer--adminer.rule=Host(`db.go-mysql-adminer.example.traefik.local`) || Host(`www.db.go-mysql-adminer.example.traefik.local`)
+      - traefik.http.routers.traefik-example-go-mysql-adminer--adminer.service=traefik-example-go-mysql-adminer--adminer
+      - traefik.http.services.traefik-example-go-mysql-adminer--adminer.loadbalancer.server.port=8080

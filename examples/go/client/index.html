@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Traefik Example - Go</title>
+    <link rel="stylesheet" type="text/css" href="app.css" />
+    <script type="module" src="app.js"></script>
+    <script type="module" defer>
+      import App from "./app.js";
+      window.app = new App(document.getElementById("app"));
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <p>Index.html is served</p>
+    </div>
+  </body>
+</html>

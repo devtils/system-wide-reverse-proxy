@@ -1,0 +1,71 @@
+#app {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+#app .product-create-form,
+#app .product-list {
+  position: relative;
+  margin: 15px;
+  padding: 0;
+  padding-top: 2em;
+}
+
+#app .product-list {
+  list-style-type: none;
+}
+
+#app .product-create-form::before,
+#app .product-list::before {
+  position: absolute;
+  top: 0;
+  left: 1em;
+  width: 100%;
+  font-size: 1.5em;
+  text-decoration: underline gray;
+}
+
+#app .product-create-form::before {
+  content: "New product";
+}
+
+#app .product-list::before {
+  content: "Products";
+}
+
+#app .product-update-form {
+  position: relative;
+  margin: 15px;
+  padding: 0;
+  padding-top: 1.3em;
+  display: flex;
+  flex-direction: column;
+}
+
+#app .product-update-form::before {
+  content: "#" attr(data-product-id);
+  position: absolute;
+  top: 0;
+  left: 1em;
+  width: 100%;
+  font-size: 1.1em;
+  text-decoration: underline gray;
+}
+
+#app .product-update-form > * {
+  margin: 5px;
+}
+
+#app .product-update-form label {
+  display: flex;
+}
+
+#app .product-update-form label .label {
+  display: inline-block;
+  min-width: 100px;
+  flex: 0;
+}
+
+#app .product-update-form label input {
+  flex: 1;
+}

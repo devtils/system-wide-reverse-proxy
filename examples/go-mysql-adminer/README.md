@@ -1,0 +1,30 @@
+# Example: Go + MySQL + Adminer
+
+This is a **Getting Started template** for a dockerized CRUD app that uses plain html/js/css (with ajax) as frontend, Go as backend, a MySQL database and Adminer.  
+All of that served as one project behind `traefik` as a system-wide reverse-proxy.
+
+## Setup
+
+Add contents of `.hosts` file to your OS-specific hosts file (`/etc/hosts` or `C:\Windows\system32\drivers\etc\hosts`)
+> You need root/admin permissions to edit this file!
+
+Then open a terminal inside of this folder and run:
+```bash
+docker-compose up
+```
+
+Wait for it to start up (until the terminal isnt spammed with log entries anymore)...
+
+You can now access
+
+- http://go-mysql-adminer.example.traefik.local/ or
+- http://www.go-mysql-adminer.example.traefik.local/
+
+to see a reloadless (ajax) CRUD app for products.
+
+You can also access
+
+- http://db.go-mysql-adminer.example.traefik.local/ or
+- http://www.db.go-mysql-adminer.example.traefik.local/
+
+to see adminer to manage the database.
