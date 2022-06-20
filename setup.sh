@@ -29,6 +29,11 @@ if [ $? -ne 0 ] ; then
   eggsit 1 "Couldn't enter '$mainDir/'. Wrong permissions?"
 fi
 
+which docker
+if [ $? -ne 0 ] ; then
+  eggsit 1 "Docker does not seem to be installed."
+fi
+
 dockerNetwork="${NET:-traefik}"
 docker network inspect $dockerNetwork 2>&1 1>/dev/null
 if [ $? -ne 0 ] ; then
@@ -45,4 +50,4 @@ fi
 
 # TODO: check if somthing blocks :80/:443
 
-docker-compose up -d && docker-compose logs -f
+echo -e "\e[32mEverything is setup.\n\n\e[0mNext steps:\n  1. configure traefik: edit $(pwd)/docker-compose.yml\n  2. start traefik:\n     cd $(pwd)\n     docker-compose up -d\n"
