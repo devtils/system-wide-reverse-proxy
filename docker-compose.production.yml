@@ -1,0 +1,64 @@
+version: "3"
+
+# run: docker network create --attachable traefik
+networks:
+  traefik:
+    external: true
+
+# run: docker volume create traefik-letsencrypt
+volumes:
+  traefik-letsencrypt:
+    external: true
+
+services:
+
+  main:
+    image: traefik:v2.7
+    restart: always
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - traefik-letsencrypt:/letsencrypt
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      # letsencrypt provider specific config (https://doc.traefik.io/traefik/https/acme/#dnschallenge)
+      # GODADDY_API_KEY: xxxxxx
+      # GODADDY_API_SECRET: xxxxxx
+    command:
+      - "--log.level=INFO"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false" # dont expose containers by default (eg. database should only be accessible by server)
+      - "--entrypoints.web.address=:80"
+      # enable this to globally activate forced http=>https redirect
+      # - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      # - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      # enable this to serve dashboard (also, enable dashboard `labels` below)
+      # - "--api.insecure=true"
+      # - "--api.dashboard=true"
+
+      - "--entrypoints.websecure.address=:443"
+      # enable and configure this to enable automated letsencrypt SSL certificate generation
+      # - "--entrypoints.websecure.http.tls.certResolver=letsencrypt"
+      # - "--certificatesresolvers.letsencrypt.acme.email=admin@example.com"
+      # - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # enable this to use acme http-challenge for letsencrypt
+      # - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      # - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      # enable this to use acme dns-challenge for letsencrypt (providers: https://doc.traefik.io/traefik/https/acme/#dnschallenge)
+      # - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=godaddy"
+      # - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=ns65.domaincontrol.com:53,ns66.domaincontrol.com:53"
+      # enable this to use staging api for testing purposes
+      # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+    labels:
+      - traefik.enable=true
+      # enable and configure this to serve traefiks dashboard behind a domain (+ letsecnrypt SSL + http=>https redirect)
+      # - traefik.http.routers.dashboard.rule=Host(`traefik.example.com`) || Host(`www.traefik.example.com`)
+      # - traefik.http.routers.dashboard.entrypoints=websecure,web
+      # - traefik.http.services.dashboard.loadbalancer.server.port=8080
+      # enable and configure this to secure traefiks dashboard using BasicAuth+htpasswd (comma-separated list)
+      # Note: duplicate each $ in hash!!! Otherwise docker interprets it as a variable
+      # - traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$hcz5fmwt$$z3/p9tKblEDsargZx0uAr/ # admin/7R43f1k
+      # - traefik.http.routers.dashboard.middlewares=dashboard-auth

@@ -1,0 +1,39 @@
+version: "3"
+
+# Add to /etc/hosts:
+# 127.0.0.1  traefik.local www.traefik.local
+
+# run: docker network create --attachable traefik
+networks:
+  traefik:
+    external: true
+
+services:
+
+  main:
+    image: traefik:v2.7
+    restart: always
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+    command:
+      - "--log.level=INFO"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false" # dont expose containers by default (eg. database should only be accessible by server)
+      - "--entrypoints.web.address=:80"
+      # enable this to activate traefiks dashboard (also, see `labels`)
+      # - "--api.insecure=true"
+      # - "--api.dashboard=true"
+    labels:
+      - traefik.enable=true
+      # enable and configure this to serve traefiks dashboard behind a domain
+      # - traefik.http.routers.dashboard.rule=Host(`traefik.local`) || Host(`www.traefik.local`)
+      # - traefik.http.routers.dashboard.entrypoints=web
+      # - traefik.http.services.dashboard.loadbalancer.server.port=8080
+      # enable and configure this to secure traefiks dashboard using BasicAuth+htpasswd (comma-separated list)
+      # Note: duplicate each $ in hash!!! Otherwise docker interprets it as a variable
+      # - traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$hcz5fmwt$$z3/p9tKblEDsargZx0uAr/ # admin/7R43f1k
+      # - traefik.http.routers.dashboard.middlewares=dashboard-auth
