@@ -1,0 +1,28 @@
+version: "3"
+
+# Note: Add content of `./.hosts` to `/etc/hosts`
+
+networks:
+  traefik:
+    external: true
+
+services:
+
+  app:
+    image: node:alpine
+    command: sh -c "cd /app && npm i && npm run dev"
+    networks:
+      - traefik
+    volumes:
+      - .:/app
+    extra_hosts:
+      - vue.example.traefik.local:0.0.0.0 # required for vite hmr
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.traefik-example-vue--app.rule=Host(`www.vue.example.traefik.local`) || (Host(`vue.example.traefik.local`) && !Path(`/ws`))
+      - traefik.http.routers.traefik-example-vue--app.service=traefik-example-vue--app
+      - traefik.http.services.traefik-example-vue--app.loadbalancer.server.port=80
+      - traefik.http.routers.traefik-example-vue--app-ws.rule=Host(`vue.example.traefik.local`) && Path(`/ws`)
+      - traefik.http.routers.traefik-example-vue--app-ws.service=traefik-example-vue--app-ws
+      - traefik.http.services.traefik-example-vue--app-ws.loadbalancer.server.port=8080

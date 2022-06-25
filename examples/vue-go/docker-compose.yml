@@ -1,0 +1,81 @@
+
+version: "3"
+
+# Note: Add content of `./.hosts` to `/etc/hosts`
+
+networks:
+  default: # every container needs this network
+  traefik: # only containers supposed to be publicly reachable for everyone need this network
+    external: true
+
+volumes:
+  database:
+
+services:
+
+  client:
+    image: node:alpine
+    command: sh -c "cd /app && npm i && npm run dev"
+    networks:
+      - traefik
+    volumes:
+      - ./client:/app
+      - ./.hosts:/.hosts
+    extra_hosts:
+      - vue-go.example.traefik.local:0.0.0.0 # required for vite hmr
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.traefik-example-vue-go--client.rule=Host(`www.vue-go.example.traefik.local`) || (Host(`vue-go.example.traefik.local`) && !Path(`/ws`) && !PathPrefix(`/api`))
+      - traefik.http.routers.traefik-example-vue-go--client.service=traefik-example-vue-go--client
+      - traefik.http.services.traefik-example-vue-go--client.loadbalancer.server.port=80
+      - traefik.http.routers.traefik-example-vue-go--client-ws.rule=Host(`vue-go.example.traefik.local`) && Path(`/ws`)
+      - traefik.http.routers.traefik-example-vue-go--client-ws.service=traefik-example-vue-go--client-ws
+      - traefik.http.services.traefik-example-vue-go--client-ws.loadbalancer.server.port=8080
+      #- traefik.http.routers.traefik-example-vue-go--client-admin.rule=(Host(`www.vue-go.example.traefik.local`) && PathPrefix(`/admin`)) || Host(`vue-go.example.traefik.local`) && PathPrefix(`/admin`))
+      #- traefik.http.routers.traefik-example-vue-go--client-admin.service=traefik-example-vue-go--client
+      #- traefik.http.routers.traefik-example-vue-go--client-admin.middlewares=traefik-example-vue-go--client--auth
+      #- traefik.http.middlewares.traefik-example-vue-go--client--auth.basicauth.users=admin:$$apr1$$1783slbe$$mgDaPJMWg.1OhhiDMnS7o/ # admin/p4s5w0rT
+
+  server:
+    build: server
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - default
+      - traefik
+    volumes:
+      - ./server:/usr/src/app
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.traefik-example-vue-go--server.rule=Host(`vue-go.example.traefik.local`) && PathPrefix(`/api`)
+      - traefik.http.routers.traefik-example-vue-go--server.service=traefik-example-vue-go--server
+      - traefik.http.services.traefik-example-vue-go--server.loadbalancer.server.port=80
+
+  database:
+    image: mariadb
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - default
+      # - traefik # private
+    volumes:
+      - database:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    labels:
+      - traefik.enable=false
+
+  adminer:
+    image: adminer
+    networks:
+      - default
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.traefik-example-vue-go--adminer.rule=Host(`db.vue-go.example.traefik.local`) || Host(`www.db.vue-go.example.traefik.local`)
+      - traefik.http.routers.traefik-example-vue-go--adminer.service=traefik-example-vue-go--adminer
+      - traefik.http.services.traefik-example-vue-go--adminer.loadbalancer.server.port=8080
