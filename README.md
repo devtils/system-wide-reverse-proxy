@@ -89,4 +89,4 @@ docker-compose down
 
 ### Setup example
 
-Please have a look at our [examples](./examples/README.md).
+Please have a look at our [examples](./examples/).
